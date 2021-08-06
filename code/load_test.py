@@ -51,7 +51,8 @@ def modcrop(img,scale):
 class DataloadFromFolderTest(data.Dataset): # load test dataset
     def __init__(self, image_dir, file_list, scale, nFrame, transform):
         super(DataloadFromFolderTest, self).__init__()
-        alist = [line.rstrip() for line in open(os.path.join(image_dir,file_list))] # load image_name from image name list, note: label list of vimo90k is video name list, not image name list.
+        #alist = [line.rstrip() for line in open(os.path.join(image_dir,file_list))] # load image_name from image name list, note: label list of vimo90k is video name list, not image name list.
+        alist = os.listdir(image_dir)
         self.image_filenames = [os.path.join(image_dir,x) for x in alist] # get image path list
         self.scale = scale
         self.transform = transform # To_tensor
@@ -60,8 +61,8 @@ class DataloadFromFolderTest(data.Dataset): # load test dataset
         GT = load_img(self.image_filenames[index], self.nFrame, self.scale, len(self.image_filenames)) 
         GT = [np.asarray(HR) for HR in GT] 
         GT = np.asarray(GT)
-        if self.scale == 4:
-            GT = np.lib.pad(GT, pad_width=((0,0), (2*self.scale,2*self.scale), (2*self.scale,2*self.scale), (0,0)), mode='reflect')
+        #if self.scale == 4:
+        #    GT = np.lib.pad(GT, pad_width=((0,0), (2*self.scale,2*self.scale), (2*self.scale,2*self.scale), (0,0)), mode='reflect')
         t = GT.shape[0]
         h = GT.shape[1]
         w = GT.shape[2]
@@ -70,17 +71,21 @@ class DataloadFromFolderTest(data.Dataset): # load test dataset
         if self.transform:
             GT = self.transform(GT) # Tensor, [CT',H',W']
         GT = GT.view(c,t,h,w)
-        target = GT[:,3,:,:]
-        LR = Guassian_downsample(GT, self.scale)
+
+        #target = GT[:,3,:,:]
+        #LR = Guassian_downsample(GT, self.scale)
+        LR = GT
         HR = imresize(LR[:,3,:,:], 4,  antialiasing=True) 
         LR_new = []
         group1 = torch.stack((LR[:,0,:,:],LR[:,3,:,:],LR[:,-1,:,:]),1)
         group2 = torch.stack((LR[:,2,:,:],LR[:,3,:,:],LR[:,-3,:,:]),1)
         group3 = torch.stack((LR[:,1,:,:],LR[:,3,:,:],LR[:,-2,:,:]),1)
         LR_new = torch.cat((group1,group2,group3),1) 
-        return LR_new, target, HR
+        return LR_new, HR
+        #return LR_new, target, HR
 
         
     def __len__(self):
-        return len(self.image_filenames) # total video number. not image number
+        return len(os.listdir(image_dir))
+        #return len(self.image_filenames) # total video number. not image number
 
