@@ -66,7 +66,8 @@ def main():
     #SSIM_avg = 0
     #test_list = ['calendar.txt', 'city.txt', 'foliage.txt', 'walk.txt']
     #for test_name in test_list:
-    opt.file_test_list = test_name 
+    #opt.file_test_list = test_name 
+    test_name = opt.file_test_list
     test_set = get_test_set(opt.test_dir, opt.file_test_list, opt.scale, opt.nFrames)
     test_loader = DataLoader(dataset=test_set, num_workers=opt.threads, batch_size=opt.testbatchsize, shuffle=False, pin_memory=pin_memory, drop_last=False)
     print('===> DataLoading Finished')
@@ -98,8 +99,8 @@ def test(test_loader, net, test_name):
             t0 = time.time()
             prediction = net(LR, HR)
             torch.cuda.synchronize()
-            t1 = time.time()
-            print("===> Timer: %.4f sec." % (t1 - t0))
+            #t1 = time.time()
+            #print("===> Timer: %.4f sec." % (t1 - t0))
         count += 1
 
         prediction = prediction.squeeze().permute(1,2,0) # [H,W,C]
@@ -125,7 +126,7 @@ def test(test_loader, net, test_name):
         #PSNR = calculate_psnr(prediction_Y, target_Y)
         #SSIM = calculate_ssim(prediction_Y, target_Y)
         t1 = time.time()
-        print("===> Processing: %s || Timer: %.4f sec." % (str(count), (t1 - t0)))
+        print("===> Processing: %s " % (str(count)))
         #print('PSNR: {:.6f} dB, \tSSIM: {:.6f}'.format(PSNR, SSIM))
         #avg_psnr += PSNR
         #avg_ssim += SSIM
@@ -136,16 +137,16 @@ def test(test_loader, net, test_name):
 def save_img(prediction,test_name,image_num, att):
     #prediction: bgr [0,1]
     if att == True:
-        save_dir = os.path.join(opt.image_out, systime)    
+        save_dir = os.path.join(opt.image_out, test_name)    
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        image_dir = os.path.join(save_dir, '{}_{:03}'.format(test_name, image_num+1) + '.png')
+        image_dir = os.path.join(save_dir, 'frame_{:03}'.format(image_num+1) + '.png')
         cv2.imwrite(image_dir, prediction, [cv2.IMWRITE_PNG_COMPRESSION, 0])
     else:
-        save_dir = os.path.join(opt.image_out, systime)
+        save_dir = os.path.join(opt.image_out, test_name)
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        image_dir = os.path.join(save_dir, '{}_{:03}'.format(test_name, image_num+1) + '.png')
+        image_dir = os.path.join(save_dir, 'frame_{:03}'.format(image_num+1) + '.png')
         cv2.imwrite(image_dir, prediction*255, [cv2.IMWRITE_PNG_COMPRESSION, 0])
 def bgr2ycbcr(img, only_y=True):
     '''same as matlab rgb2ycbcr
@@ -230,4 +231,12 @@ def calculate_ssim(img1, img2):
 
 
 if __name__=='__main__':
+    with open(os.path.join(opt.image_out, 'TGA.txt'), 'a') as f:
+        f.write('OK ' + opt.file_test_list + '\n')
+        begin = time.time()
+    
     main()
+
+    end = time.time()
+    with open(os.path.join(opt.image_out, 'TGA.txt'), 'a') as f:
+        f.write('Full time on {}: {}\n'.format(opt.file_test_list, end - begin))

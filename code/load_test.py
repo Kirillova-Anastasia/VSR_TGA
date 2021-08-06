@@ -19,21 +19,21 @@ def load_img(image_path, nFrame, scale, num):
     for i in seq:
        if i != 0:
            index = int(image_path[char_len-7:char_len-4]) + i
-           image = image_path[0:char_len-7]+'{0:03d}'.format(index)+'.png'
+           image = image_path[0:char_len-7]+'{:03d}'.format(index)+'.png'
            if os.path.exists(image):
                temp = modcrop(Image.open(image).convert('RGB'), scale)
                HR.append(temp)
            elif index <= 0:
                print('{} is not found, using reference lr frame to pad'.format(image))
                index_first = 1
-               image_first = image_path[0:char_len-7]+'{0:03d}'.format(index_first)+'.png'
+               image_first = image_path[0:char_len-7]+'{:03d}'.format(index_first)+'.png'
                temp_first = modcrop(Image.open(image_first).convert('RGB'), scale)
                HR.append(temp_first)
                count += 1
            elif index > 0:
                print('{} is not found, using reference lr frame to pad'.format(image))
                index_last = num
-               image_last = image_path[0:char_len-7]+'{0:03d}'.format(index_last)+'.png'
+               image_last = image_path[0:char_len-7]+'{:03d}'.format(index_last)+'.png'
                temp_last = modcrop(Image.open(image_last).convert('RGB'), scale)
                HR.append(temp_last)
                count += 1
@@ -86,6 +86,5 @@ class DataloadFromFolderTest(data.Dataset): # load test dataset
 
         
     def __len__(self):
-        return len(os.listdir(image_dir))
-        #return len(self.image_filenames) # total video number. not image number
+        return len(self.image_filenames) # total video number. not image number
 
