@@ -1,3 +1,7 @@
+# Running on your own dataset:
+1) We used `pytorch/pytorch:1.1.0-cuda10.0-cudnn7.5-devel` docker. Directory with input images is mounted as `/dataset`, results will be saved in `/output`, directory with code is mounted as `/TGA`. You should set  `--shm-size 8G` parameter.
+2) Enter directory `/TGA`. See `TGA.sh` script for installation commands and running example.
+
 ![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)
 ![PyTorch 1.1](https://img.shields.io/badge/pytorch-1.1-yellow.svg)
 
